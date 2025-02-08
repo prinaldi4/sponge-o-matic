@@ -929,58 +929,57 @@ function generateImage() {
 function downloadImage() {
     canvas.width = mainArea.offsetWidth;
     canvas.height = mainArea.offsetHeight;
+    const ctx = canvas.getContext('2d');
 
-    const backgroundDiv = mainArea.querySelector('div:not(#gif-overlay)');
-    const backgroundImage = new Image();
-    backgroundImage.src = backgroundDiv.style.backgroundImage.slice(5, -2); // Remove url() wrapper
-
-    backgroundImage.onload = () => {
-        // Draw background
-        ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
-
-        const assets = mainArea.querySelectorAll('.placed-asset');
-        let loadedAssets = 0;
-
-        // If no assets, just download the background
-        if (assets.length === 0) {
-            const link = document.createElement('a');
-            link.download = 'my-character.png';
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-            return;
-        }
-
-        // Draw all assets in correct order
-        assets.forEach(asset => {
-            // Skip hidden custom images (they've been transformed into backgrounds)
-            if (asset.style.display === 'none' || asset.getAttribute('data-type') === 'custom-image') {
-                loadedAssets++;
-                checkComplete();
-                return;
-            }
-
-            const img = new Image();
-            img.src = asset.src;
-            img.onload = () => {
-                // Draw the image maintaining its z-index order
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                loadedAssets++;
-                checkComplete();
-            };
+    // Get all assets and sort them by z-index
+    const assets = Array.from(mainArea.querySelectorAll('.placed-asset, div:not(#gif-overlay)'))
+        .sort((a, b) => {
+            const zIndexA = parseInt(a.style.zIndex) || 0;
+            const zIndexB = parseInt(b.style.zIndex) || 0;
+            return zIndexA - zIndexB;
         });
 
-        function checkComplete() {
-            if (loadedAssets === assets.length) {
-                // All assets have been drawn, create download
-                const link = document.createElement('a');
-                link.download = 'my-character.png';
-                link.href = canvas.toDataURL('image/png');
-                link.click();
+    // Create a promise for loading and drawing each asset
+    const loadAndDrawImage = (asset) => {
+        return new Promise((resolve) => {
+            if (asset.tagName.toLowerCase() === 'div') {
+                // Handle background div
+                const bgImage = new Image();
+                bgImage.onload = () => {
+                    ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
+                    resolve();
+                };
+                const bgUrl = asset.style.backgroundImage.replace(/url\(['"](.+)['"]\)/, '$1');
+                bgImage.src = bgUrl;
+            } else if (!asset.style.display || asset.style.display !== 'none') {
+                // Handle regular images
+                const img = new Image();
+                img.onload = () => {
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    resolve();
+                };
+                img.src = asset.src;
+            } else {
+                resolve(); // Skip hidden elements
             }
-        }
+        });
     };
-}
 
+    // Process all assets in sequence
+    const processAssets = async () => {
+        for (const asset of assets) {
+            await loadAndDrawImage(asset);
+        }
+        // After all assets are drawn, create the download
+        const link = document.createElement('a');
+        link.download = 'my-character.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    };
+
+    processAssets();
+}
+        
 // Helper function to create a clean canvas for screenshots
 function createScreenshot() {
     const screenshotCanvas = document.createElement('canvas');
