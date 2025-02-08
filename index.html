@@ -965,12 +965,37 @@ function downloadImage() {
         });
     };
 
+    // Add logo to the canvas
+    const addLogo = () => {
+        return new Promise((resolve) => {
+            const logo = new Image();
+            logo.onload = () => {
+                // Position the logo in the bottom right corner with padding
+                const logoWidth = 100; // Adjust size as needed
+                const logoHeight = (logo.height / logo.width) * logoWidth;
+                const padding = 20;
+                
+                ctx.drawImage(
+                    logo,
+                    canvas.width - logoWidth - padding,  // X position
+                    canvas.height - logoHeight - padding, // Y position
+                    logoWidth,
+                    logoHeight
+                );
+                resolve();
+            };
+            logo.src = 'img/watermark-logo.png'; // Path to your logo file
+        });
+    };
+
     // Process all assets in sequence
     const processAssets = async () => {
         for (const asset of assets) {
             await loadAndDrawImage(asset);
         }
-        // After all assets are drawn, create the download
+        // Add logo after all other elements are drawn
+        await addLogo();
+        // Create the download
         const link = document.createElement('a');
         link.download = 'my-character.png';
         link.href = canvas.toDataURL('image/png');
