@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scotch-Brite Character Generator</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            padding-top: 30px;
+            font-family: "Montserrat", sans-serif;
+            font-optical-sizing: auto;
+            font-weight: 400;
+            font-style: normal;
+        }
+
+        /* NEW: Upload button styles */
+        .upload-container {
+            width: 120px;  /* Match the width of other containers */
+            height: 120px; /* Match the height of other containers */
+            background-color: #58B74E;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .upload-btn {
+            width: 120px;
+            height: 120px;
+            background-color: #58B74E;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            border: none;
+            font-family: "Montserrat", sans-serif;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .upload-btn:hover {
+            background-color: #48973f;
+        }
+
+        /* NEW: Image overlay styles */
+        .image-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .overlay-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            position: relative;
+            display: flex;
+            gap: 30px;
+            max-width: 900px;
+        }
+
+        .image-preview-container {
+            position: relative;
+            width: 450px;
+            height: 600px;
+            border: 2px solid #000;
+            flex-shrink: 0;
+        }
+
+        #uploadedImage {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .overlay-mask {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .overlay-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding: 20px;
+        }
+
+        .overlay-guidelines {
+            padding: 10px;
+        }
+
+        .overlay-guidelines h3 {
+            font-size: 24px;
+            font-weight: 500;
+            margin-bottom: 52px;
+        }
+
+        .overlay-guidelines .guidelines-header,
+        .overlay-guidelines h3 {
+            font-size: 24px !important; /* Using !important to override any conflicting styles */
+            font-weight: 600;
+            margin-bottom: 55px;
+            font-family: "Montserrat", sans-serif;
+            line-height: 1.2;
+        }
+
+        .guideline-points {
+            margin-left: 0px;  /* Add some indentation for the bullet points */
+        }
+
+        .guideline-points p {
+            font-size: 16px;
+            margin-bottom: 40px;  /* Add space between bullet points */
+            line-height: 1.4;
+        }
+
+        .overlay-controls button {
+            width: 100%;
+            padding: 12px 20px;
+            margin: 5px 0;
+        }
+
+        .overlay-controls button:hover {
+            background-color: #48973f;
+        }
+
+        .overlay-controls select {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            font-family: "Montserrat", sans-serif;
+            font-weight: 500;
+            color: #333;
+            background-color: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            appearance: none; /* Removes default browser styling */
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 16px;
+        }
+
+        .overlay-controls select:hover {
+            border-color: #ccc;
+            background-color: #f8f8f8;
+        }
+
+        .overlay-controls select:focus {
+            outline: none;
+            border-color: #58B74E;
+            box-shadow: 0 0 0 3px rgba(88, 183, 78, 0.1);
+        }
+
+        /* Style for the options within the dropdown */
+        .overlay-controls select option {
+            padding: 15px;
+            font-size: 16px;
+            font-family: "Montserrat", sans-serif;
+        }
+
+        .close-overlay {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 32px;
+            cursor: pointer;
+            color: #666;
+            font-weight: bold;
+            padding: 5px;  /* Reduce padding */
+            width: 40px;   /* Set specific width */
+            height: 40px;  /* Set specific height */
+            line-height: 1;  /* Adjust line height */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: unset; /* Override any minimum width */
+        }
+
+        .close-overlay:hover {
+            color: #000;
+        }
+
+        /* NEW: Style for hiding file input */
+        input[type="file"] {
+            display: none;
+        }
+
+        .logo {
+            width: 450px;
+            height: auto;
+            margin-bottom: 5px;
+        }
+
+        h1 {
+            margin-bottom: 10px;
+            margin-top: 10px;
+            font-weight: 700;  /* Bold weight */
+            font-size: 50pt;
+        }
+
+        .sub-copy {
+            font-size: 18px;
+            color: #666666;
+            margin-bottom: 30px;
+            text-align: center;
+            max-width: 600px;
+            line-height: 1.4;
+            font-weight: 400;  /* Light weight */
+        }
+
+        .container {
+            position: relative;
+            display: grid;
+            grid-template-columns: auto 450px auto;
+            grid-template-rows: auto auto;
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+            align-items: start; /* This ensures top alignment */
+        }
+
+        .main-area {
+            position: relative;
+            width: 450px;
+            height: 600px;
+            min-width: 400px;
+            min-height: 500px;
+            max-width: 450px;
+            max-height: 600px;
+            border: 1px solid #000;
+            margin: 10px 0 0 0; /* Add margin-top of 10px, adjust this value as needed */
+            align-self: start; /* This ensures the main area aligns to the top */
+        }
+
+        .left-toolbar {
+            grid-row: 1 / span 2; /* Span both rows */
+            grid-column: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .right-toolbar {
+            grid-row: 1 / span 2; /* Span both rows */
+            grid-column: 3;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .left-toolbar, .right-toolbar {
+            align-self: start;
+        }
+
+        .side-container {
+            width: 250px;
+            height: auto;
+            border: 1px solid #ccc;
+            margin: 10px;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .side-container h3 {
+            width: 100%;
+            text-align: center;
+            margin: 0;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .color-options {
+            width: 550px;  /* Increase width to accommodate all items */
+            border: 1px solid #ccc;
+            margin: 10px auto 30px auto;
+            padding: 20px;  /* Add more padding */
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .color-options h3 {
+            width: 100%;
+            text-align: center;
+            margin: 0;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .sponge-options {
+            display: flex;
+            justify-content: space-between; /* This evenly spaces the items */
+            width: 100%;
+            padding: 0;
+        }
+
+        .background-option-container {
+            position: relative;
+            display: inline-block;
+            width: 120px;  /* Fixed width for all containers */
+            height: 120px; /* Fixed height for all containers */
+        }
+
+        .background-option-container img {
+            width: 110px;
+            height: 110px;
+            display: block;
+            cursor: pointer;
+            object-fit: contain;
+            padding: 5px;
+            border: none;  /* Remove the border completely */
+            border-radius: 8px;
+            background-color: #f5f5f5;
+        }
+
+        .hover-text {
+            position: absolute;
+            left: 0;
+            top: 0;
+            font-weight: 600;  /* Regular weight */
+            width: 100%;
+            height: 100%;
+            background-color: #FFB800;
+            color: black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            font-size: 13px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            border-radius: 8px;
+        }
+
+        .background-option-container:hover .hover-text {
+            opacity: 1;
+        }
+
+        /* Remove the hover border effect */
+        .background-option-container:hover img {
+            transform: scale(1.1);
+            transition: transform 0.2s;
+        }
+        
+
+        .clickable-asset {
+            width: 80px;
+            height: 80px;
+            cursor: pointer;
+            object-fit: contain;
+            padding: 5px;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            background-color: #f5f5f5;
+        }
+
+        .clickable-asset:hover {
+            transform: scale(1.1);
+            transition: transform 0.2s;
+            border-color: #ff4444;
+        }
+
+        .placed-asset {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .primary-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 5px; /* Space between top buttons and Download button */
+        }
+
+        button {
+            margin: 0;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: 700;  /* Bold weight */
+            background-color: #FFB800;
+            color: rgb(0, 0, 0);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            min-width: 120px; /* Make all buttons the same width */
+        }
+
+        button:hover {
+            background-color: #E6A600;
+        }
+
+        .generate-btn {
+            background-color: #58B74E;  /* Green color for Generate */
+        }
+
+        .generate-btn:hover {
+            background-color: #48973f;  /* Darker green for Generate hover */
+        }
+
+        .download-btn {
+            background-color: #ff4444;  /* Yellow color for Download */
+        }
+
+        .download-btn:hover {
+            background-color: #cc0000;  /* Darker yellow for hover */
+        }
+
+        .gif-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 450px;
+            height: 600px;
+            display: none;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        #overlay-gif {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .title-box {
+            width: 100px;
+            height: 133px;
+            margin: 0 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            font-size: 14px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <img src="img/Logos.jpg" alt="Logo" class="logo">
+    <h1>Sponge-O-Matic</h1>
+    <p class="sub-copy">Customize your <b>Scotch-Brite™ Scrub Sponge</b> to create <br>your own Bikini Bottom character!</p>
+
+    <div class="color-options">
+        <h3>Choose Your Sponge</h3>
+        <div class="sponge-options">
+            <!-- NEW: Upload button container -->
+            <div class="background-option-container upload-container">
+                <input type="file" id="imageUpload" accept="image/*" style="display: none;">
+                <button onclick="showImageUploadOverlay()" class="upload-btn">
+                    Upload Photo
+                </button>
+            </div>
+
+            <!-- Your existing sponge options -->
+            <div class="background-option-container">
+                <img src="img/Thumbnails/green-sponge-thumb.png" alt="Green Sponge" class="clickable-asset" 
+                     onclick="setMainImage('img/Sponges/green-sponge.png')">
+                <span class="hover-text">Heavy <br>Duty Scrub <br> Sponge</span>
+            </div>
+            <div class="background-option-container">
+                <img src="img/Thumbnails/blue-sponge-thumb.png" alt="Blue Sponge" class="clickable-asset" 
+                     onclick="setMainImage('img/Sponges/blue-sponge.png')">
+                <span class="hover-text">Non-Scratch Scrub <br>Sponge</span>
+            </div>
+            <div class="background-option-container">
+                <img src="img/Thumbnails/red-sponge-thumb.png" alt="Pink Sponge" class="clickable-asset" 
+                     onclick="setMainImage('img/Sponges/red-sponge.png')">
+                <span class="hover-text">Delicate <br>Care Scrub<br> Sponge</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="left-toolbar">
+            <div class="side-container">
+                <h3>Eyes</h3>
+                <img src="img/Thumbnails/eyes1-thumb.png" alt="Eyes" class="clickable-asset" 
+                     onclick="addAsset('img/Eyes/eyes1.png', 'eyes')">
+                <img src="img/Thumbnails/eyes2-thumb.png" alt="Eyes" class="clickable-asset" 
+                     onclick="addAsset('img/Eyes/eyes2.png', 'eyes')">
+                <img src="img/Thumbnails/eyes3-thumb.png" alt="Eyes" class="clickable-asset" 
+                     onclick="addAsset('img/Eyes/eyes3.png', 'eyes')">
+            </div>
+            <div class="side-container">
+                <h3>Nose</h3>
+                <img src="img/Thumbnails/nose1-thumb.png" alt="Nose" class="clickable-asset" 
+                     onclick="addAsset('img/Noses/nose1.png', 'nose')">
+                <img src="img/Thumbnails/nose2-thumb.png" alt="Nose" class="clickable-asset" 
+                     onclick="addAsset('img/Noses/nose2.png', 'nose')">
+                <img src="img/Thumbnails/nose3-thumb.png" alt="Nose" class="clickable-asset" 
+                     onclick="addAsset('img/Noses/nose3.png', 'nose')">
+            </div>
+            <div class="side-container">
+                <h3>Arms</h3>
+                <img src="img/Thumbnails/arm1-thumb.png" alt="Arms" class="clickable-asset" 
+                     onclick="addArmPair('img/Arms/R-arm1.png', 'img/Arms/L-arm1.png')">
+                <img src="img/Thumbnails/arm2-thumb.png" alt="Arms" class="clickable-asset" 
+                     onclick="addArmPair('img/Arms/R-arm2.png', 'img/Arms/L-arm2.png')">
+            </div>
+        </div>
+
+        <div class="main-area" id="main-area">
+            <div id="gif-overlay" class="gif-overlay">
+                <img src="img/Bubbles/bubble-animation.gif" alt="Transform Animation" id="overlay-gif">
+            </div>
+        </div>
+
+        <div class="button-container">
+            <div class="primary-buttons">
+                <button onclick="undoLastAction()">Undo</button>
+                <button onclick="resetMain()">Reset</button>
+                <button class="generate-btn" onclick="generateImage()">Generate</button>
+            </div>
+            <button id="downloadBtn" class="download-btn" style="display: none;" onclick="downloadImage()">Download</button>
+        </div>
+
+        <div class="right-toolbar">
+            <div class="side-container">
+                <h3>Mouth</h3>
+                <img src="img/Thumbnails/mouth1-thumb.png" alt="Mouth" class="clickable-asset" 
+                     onclick="addAsset('img/Mouths/mouth1.png', 'mouth')">
+                <img src="img/Thumbnails/mouth2-thumb.png" alt="Mouth" class="clickable-asset" 
+                     onclick="addAsset('img/Mouths/mouth2.png', 'mouth')">
+                <img src="img/Thumbnails/mouth3-thumb.png" alt="Mouth" class="clickable-asset" 
+                     onclick="addAsset('img/Mouths/mouth3.png', 'mouth')">
+            </div>
+            <div class="side-container">
+                <h3>Legs</h3>
+                <img src="img/Thumbnails/legs1-thumb.png" alt="Legs" class="clickable-asset" 
+                     onclick="addAsset('img/Legs/legs1.png', 'legs')">
+                <img src="img/Thumbnails/legs2-thumb.png" alt="Legs" class="clickable-asset" 
+                     onclick="addAsset('img/Legs/legs2.png', 'legs')">
+                <img src="img/Thumbnails/legs3-thumb.png" alt="Legs" class="clickable-asset" 
+                     onclick="addAsset('img/Legs/legs3.png', 'legs')">
+            </div>
+            <div class="side-container">
+                <h3>Backgrounds</h3>
+                <img src="img/Thumbnails/background1-thumb.png" alt="Background" class="clickable-asset" 
+                     onclick="addAsset('img/Backgrounds/background1.png', 'background')">
+                <img src="img/Thumbnails/background2-thumb.png" alt="Background" class="clickable-asset" 
+                     onclick="addAsset('img/Backgrounds/background2.png', 'background')">
+            </div>
+        </div>
+    </div>
+
+    <!-- NEW: Image Overlay Container -->
+    <div id="imageOverlay" class="image-overlay" style="display: none;">
+        <div class="overlay-content">
+            <button class="close-overlay" onclick="closeImageOverlay()">×</button>
+            
+            <div class="image-preview-container">
+                <img id="uploadedImage" src="" alt="Uploaded image">
+                <img class="overlay-mask" src="img/overlay-mask.png" alt="Overlay">
+            </div>
+    
+            <div class="overlay-controls">
+                <div class="overlay-guidelines">
+                    <h3 class="guidelines-header">Make sure your photo follows these guidelines:</h3>
+                    <div class="guideline-points">
+                        <p>• Your sponge must be vertical</p>
+                        <p>• Keep your sponge within the marked area</p>
+                        <p>• Your photo has good lighting</p>
+                    </div>
+                </div>
+                
+                <button onclick="document.getElementById('imageUpload').click()">
+                    Choose Another Photo
+                </button>
+                
+                <select id="spongeType">
+                    <option value="green">Heavy Duty Scrub Sponge</option>
+                    <option value="blue">Non-Scratch Scrub Sponge</option>
+                    <option value="red">Delicate Care Scrub Sponge</option>
+                </select>
+                
+                <button onclick="addCustomImage()" class="generate-btn">
+                    Spongify!
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <audio id="transformSound" preload="auto">
+        <source src="img/Bubbles/bubble-animation-sound.mp3" type="audio/mpeg">
+    </audio>
+
+    <canvas id="canvas" style="display: none;"></canvas>
+
+    <script>
+       let actionHistory = [];
+let isGenerating = false;
+let customImageData = null;
+const mainArea = document.getElementById('main-area');
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+let currentBackground = '';
+
+document.getElementById('imageUpload').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('uploadedImage').src = e.target.result;
+            document.getElementById('imageOverlay').style.display = 'flex';
+            customImageData = e.target.result;
+        }
+        reader.readAsDataURL(file);
+    }
+});
+
+function closeImageOverlay() {
+    document.getElementById('imageOverlay').style.display = 'none';
+}
+
+function addCustomImage() {
+    if (customImageData) {
+        const spongeType = document.getElementById('spongeType').value;
+        const customImage = document.createElement('img');
+        customImage.src = customImageData;
+        customImage.classList.add('placed-asset');
+        customImage.style.zIndex = '-3'; // Behind everything
+        customImage.setAttribute('data-type', 'custom-image');
+        customImage.setAttribute('data-sponge-type', spongeType);
+
+        // Remove any existing custom image
+        const existingCustomImage = mainArea.querySelector('.placed-asset[data-type="custom-image"]');
+        if (existingCustomImage) {
+            existingCustomImage.remove();
+        }
+
+        mainArea.appendChild(customImage);
+        closeImageOverlay();
+        saveState();
+    }
+}
+
+function showImageUploadOverlay() {
+    document.getElementById('imageUpload').click();
+}
+
+// Modify the existing imageUpload event listener
+document.getElementById('imageUpload').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('uploadedImage').src = e.target.result;
+            document.getElementById('imageOverlay').style.display = 'flex';
+            customImageData = e.target.result;
+        }
+        reader.readAsDataURL(file);
+    }
+});
+
+function setMainImage(imagePath) {
+    currentBackground = imagePath;
+    const gifOverlay = document.getElementById('gif-overlay');
+    mainArea.innerHTML = '';
+    const div = document.createElement('div');
+    div.style.width = '100%';
+    div.style.height = '100%';
+    div.style.backgroundImage = `url(${imagePath})`;
+    div.style.backgroundSize = 'cover';
+    div.style.backgroundPosition = 'center';
+    mainArea.appendChild(div);
+    mainArea.appendChild(gifOverlay);
+    saveState();
+}
+
+function addArmPair(rightArmSrc, leftArmSrc) {
+    // Add right arm
+    const rightArm = document.createElement('img');
+    rightArm.src = rightArmSrc;
+    rightArm.classList.add('placed-asset');
+    rightArm.style.zIndex = '100'; // Right arm in front
+    rightArm.setAttribute('data-type', 'R-arm');
+
+    // Add left arm
+    const leftArm = document.createElement('img');
+    leftArm.src = leftArmSrc;
+    leftArm.classList.add('placed-asset');
+    leftArm.style.zIndex = '-1'; // Left arm behind
+    leftArm.setAttribute('data-type', 'L-arm');
+
+    // Remove any existing arms
+    const existingRightArm = mainArea.querySelector('.placed-asset[data-type="R-arm"]');
+    const existingLeftArm = mainArea.querySelector('.placed-asset[data-type="L-arm"]');
+    if (existingRightArm) existingRightArm.remove();
+    if (existingLeftArm) existingLeftArm.remove();
+
+    // Add both arms
+    mainArea.appendChild(leftArm);
+    mainArea.appendChild(rightArm);
+    
+    saveState();
+}
+
+function addAsset(src, type) {
+    const img = document.createElement('img');
+    img.src = src;
+    img.classList.add('placed-asset');
+    
+    switch(type) {
+        case 'R-arm':
+            img.style.zIndex = '100';
+            break;
+        case 'nose':
+            img.style.zIndex = '80';
+            break;
+        case 'eyes':
+            img.style.zIndex = '70';
+            break;
+        case 'mouth':
+            img.style.zIndex = '60';
+            break;
+        case 'legs':
+            img.style.zIndex = '50';
+            break;
+        case 'background':
+            img.style.zIndex = '-2';
+            break;
+        case 'L-arm':
+            img.style.zIndex = '-1';
+            break;
+    }
+    
+    const existingAsset = mainArea.querySelector(`.placed-asset[data-type="${type}"]`);
+    if (existingAsset) {
+        existingAsset.remove();
+    }
+    
+    img.setAttribute('data-type', type);
+    mainArea.appendChild(img);
+    saveState();
+}
+
+function generateImage() {
+    // Remove background check and just check if generation is in progress
+    if (isGenerating) {
+        return;
+    }
+
+    isGenerating = true;
+    
+    // Remove old gif overlay completely
+    const oldGifOverlay = document.getElementById('gif-overlay');
+    if (oldGifOverlay) {
+        oldGifOverlay.remove();
+    }
+
+    // Create fresh gif overlay
+    const gifOverlay = createGifOverlay();
+    mainArea.appendChild(gifOverlay);
+    
+    // Play sound
+    const transformSound = document.getElementById('transformSound');
+    transformSound.currentTime = 0;
+    transformSound.play();
+    
+    // Show GIF
+    gifOverlay.style.display = 'block';
+
+    const gifDuration = 3000; // Exactly 3 seconds
+    const halfwayPoint = gifDuration / 2;
+
+    setTimeout(() => {
+        // Handle custom image transformation
+        const customImage = mainArea.querySelector('.placed-asset[data-type="custom-image"]');
+        if (customImage) {
+            const spongeType = customImage.getAttribute('data-sponge-type');
+            
+            // Randomly add a background if it's a custom image
+            const backgrounds = [
+                'img/Backgrounds/background1-3d.png',
+                'img/Backgrounds/background2-3d.png'
+            ];
+            const randomBackground = backgrounds[Math.floor(Math.random() * backgrounds.length)];
+            addAsset(randomBackground, 'background');
+
+            // Rest of custom image handling...
+            let backgroundDiv = mainArea.querySelector('div:not(#gif-overlay)');
+            if (!backgroundDiv) {
+                backgroundDiv = document.createElement('div');
+                backgroundDiv.style.width = '100%';
+                backgroundDiv.style.height = '100%';
+                backgroundDiv.style.backgroundSize = 'cover';
+                backgroundDiv.style.backgroundPosition = 'center';
+                mainArea.insertBefore(backgroundDiv, mainArea.firstChild);
+            }
+            
+            // Hide the custom image
+            customImage.style.display = 'none';
+            
+            // Set the appropriate 3D sponge background
+            switch(spongeType) {
+                case 'green':
+                    backgroundDiv.style.backgroundImage = 'url(img/Sponges/green-sponge-3d.png)';
+                    break;
+                case 'blue':
+                    backgroundDiv.style.backgroundImage = 'url(img/Sponges/blue-sponge-3d.png)';
+                    break;
+                case 'red':
+                    backgroundDiv.style.backgroundImage = 'url(img/Sponges/red-sponge-3d.png)';
+                    break;
+            }
+        } else if (currentBackground) {
+            // Handle regular sponge transformation
+            const backgroundDiv = mainArea.querySelector('div:not(#gif-overlay)');
+            switch(currentBackground) {
+                case 'img/Sponges/blue-sponge.png':
+                    backgroundDiv.style.backgroundImage = 'url(img/Sponges/blue-sponge-3d.png)';
+                    break;
+                case 'img/Sponges/green-sponge.png':
+                    backgroundDiv.style.backgroundImage = 'url(img/Sponges/green-sponge-3d.png)';
+                    break;
+                case 'img/Sponges/red-sponge.png':
+                    backgroundDiv.style.backgroundImage = 'url(img/Sponges/red-sponge-3d.png)';
+                    break;
+            }
+        }
+
+        // Transform all other assets
+        const placedAssets = mainArea.querySelectorAll('.placed-asset:not([data-type="custom-image"])');
+        placedAssets.forEach(asset => {
+            const currentSrc = asset.src;
+            
+            if (currentSrc.includes('legs1.png')) {
+                asset.src = 'img/Legs/legs1-3d.png';
+            } else if (currentSrc.includes('legs2.png')) {
+                asset.src = 'img/Legs/legs2-3d.png';
+            } else if (currentSrc.includes('legs3.png')) {
+                asset.src = 'img/Legs/legs3-3d.png';
+            } else if (currentSrc.includes('eyes1.png')) {
+                asset.src = 'img/Eyes/eyes1-3d.png';
+            } else if (currentSrc.includes('eyes2.png')) {
+                asset.src = 'img/Eyes/eyes2-3d.png';
+            } else if (currentSrc.includes('eyes3.png')) {
+                asset.src = 'img/Eyes/eyes3-3d.png';
+            } else if (currentSrc.includes('nose1.png')) {
+                asset.src = 'img/Noses/nose1-3d.png';
+            } else if (currentSrc.includes('nose2.png')) {
+                asset.src = 'img/Noses/nose2-3d.png';
+            } else if (currentSrc.includes('nose3.png')) {
+                asset.src = 'img/Noses/nose3-3d.png';
+            } else if (currentSrc.includes('mouth1.png')) {
+                asset.src = 'img/Mouths/mouth1-3d.png';
+            } else if (currentSrc.includes('mouth2.png')) {
+                asset.src = 'img/Mouths/mouth2-3d.png';
+            } else if (currentSrc.includes('mouth3.png')) {
+                asset.src = 'img/Mouths/mouth3-3d.png';
+            } else if (currentSrc.includes('R-arm1.png')) {
+                asset.src = 'img/Arms/R-arm1-3d.png';
+            } else if (currentSrc.includes('R-arm2.png')) {
+                asset.src = 'img/Arms/R-arm2-3d.png';
+            } else if (currentSrc.includes('L-arm1.png')) {
+                asset.src = 'img/Arms/L-arm1-3d.png';
+            } else if (currentSrc.includes('L-arm2.png')) {
+                asset.src = 'img/Arms/L-arm2-3d.png';
+            } else if (currentSrc.includes('background1.png')) {
+                asset.src = 'img/Backgrounds/background1-3d.png';
+            } else if (currentSrc.includes('background2.png')) {
+                asset.src = 'img/Backgrounds/background2-3d.png';
+            }
+        });
+    }, halfwayPoint);
+
+    // Clean up at the end
+    setTimeout(() => {
+        if (gifOverlay) {
+            gifOverlay.style.display = 'none';
+        }
+        document.getElementById('downloadBtn').style.display = 'inline-block';
+        isGenerating = false;
+    }, gifDuration);
+}
+
+function downloadImage() {
+    canvas.width = mainArea.offsetWidth;
+    canvas.height = mainArea.offsetHeight;
+
+    const backgroundDiv = mainArea.querySelector('div:not(#gif-overlay)');
+    const backgroundImage = new Image();
+    backgroundImage.src = backgroundDiv.style.backgroundImage.slice(5, -2); // Remove url() wrapper
+
+    backgroundImage.onload = () => {
+        // Draw background
+        ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+
+        const assets = mainArea.querySelectorAll('.placed-asset');
+        let loadedAssets = 0;
+
+        // If no assets, just download the background
+        if (assets.length === 0) {
+            const link = document.createElement('a');
+            link.download = 'my-character.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            return;
+        }
+
+        // Draw all assets in correct order
+        assets.forEach(asset => {
+            // Skip hidden custom images (they've been transformed into backgrounds)
+            if (asset.style.display === 'none' || asset.getAttribute('data-type') === 'custom-image') {
+                loadedAssets++;
+                checkComplete();
+                return;
+            }
+
+            const img = new Image();
+            img.src = asset.src;
+            img.onload = () => {
+                // Draw the image maintaining its z-index order
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                loadedAssets++;
+                checkComplete();
+            };
+        });
+
+        function checkComplete() {
+            if (loadedAssets === assets.length) {
+                // All assets have been drawn, create download
+                const link = document.createElement('a');
+                link.download = 'my-character.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            }
+        }
+    };
+}
+
+// Helper function to create a clean canvas for screenshots
+function createScreenshot() {
+    const screenshotCanvas = document.createElement('canvas');
+    screenshotCanvas.width = mainArea.offsetWidth;
+    screenshotCanvas.height = mainArea.offsetHeight;
+    const ctx = screenshotCanvas.getContext('2d');
+    
+    // Draw background
+    const backgroundDiv = mainArea.querySelector('div:not(#gif-overlay)');
+    ctx.drawImage(backgroundDiv, 0, 0, screenshotCanvas.width, screenshotCanvas.height);
+    
+    // Draw assets in order of z-index
+    const assets = Array.from(mainArea.querySelectorAll('.placed-asset'))
+        .sort((a, b) => parseInt(a.style.zIndex) - parseInt(b.style.zIndex));
+    
+    assets.forEach(asset => {
+        if (asset.style.display !== 'none') {
+            ctx.drawImage(asset, 0, 0, screenshotCanvas.width, screenshotCanvas.height);
+        }
+    });
+    
+    return screenshotCanvas;
+}
+
+function saveState() {
+    const currentState = {
+        background: currentBackground,
+        html: mainArea.innerHTML,
+        customImage: customImageData // Save custom image data if present
+    };
+    actionHistory.push(currentState);
+}
+
+function undoLastAction() {
+    if (actionHistory.length > 1) { // Keep at least one state
+        actionHistory.pop(); // Remove current state
+        const previousState = actionHistory[actionHistory.length - 1];
+        
+        // Restore previous state
+        currentBackground = previousState.background;
+        mainArea.innerHTML = previousState.html;
+        customImageData = previousState.customImage; // Restore custom image data
+        
+        // Reattach gif-overlay if needed
+        const gifOverlay = document.getElementById('gif-overlay');
+        if (!gifOverlay) {
+            const newGifOverlay = createGifOverlay();
+            mainArea.appendChild(newGifOverlay);
+        }
+
+        // Hide download button if visible
+        const downloadBtn = document.getElementById('downloadBtn');
+        if (downloadBtn.style.display !== 'none') {
+            downloadBtn.style.display = 'none';
+        }
+    }
+}
+
+function resetMain() {
+    // Stop any ongoing generation
+    isGenerating = false;
+    
+    // Stop sound
+    const transformSound = document.getElementById('transformSound');
+    transformSound.pause();
+    transformSound.currentTime = 0;
+    
+    // Clear main area
+    mainArea.innerHTML = '';
+    
+    // Create fresh gif overlay
+    const newGifOverlay = createGifOverlay();
+    mainArea.appendChild(newGifOverlay);
+    
+    // Reset all states
+    currentBackground = '';
+    customImageData = null; // Clear custom image data
+    document.getElementById('downloadBtn').style.display = 'none';
+    actionHistory = [];
+    saveState();
+
+    // Close image overlay if open
+    const imageOverlay = document.getElementById('imageOverlay');
+    if (imageOverlay.style.display !== 'none') {
+        closeImageOverlay();
+    }
+}
+
+function createGifOverlay() {
+    const overlay = document.createElement('div');
+    overlay.id = 'gif-overlay';
+    overlay.className = 'gif-overlay';
+    
+    const img = document.createElement('img');
+    img.src = 'img/Bubbles/bubble-animation.gif?' + new Date().getTime(); // Force new load
+    img.id = 'overlay-gif';
+    img.alt = 'Transform Animation';
+    
+    overlay.appendChild(img);
+    return overlay;
+}
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', () => {
+    saveState();
+    
+    // Pre-load the sound
+    const transformSound = document.getElementById('transformSound');
+    transformSound.load();
+
+    // Pre-load the overlay mask
+    const overlayMask = new Image();
+    overlayMask.src = 'img/overlay-mask.png';
+});
+
+// Utility function to handle image loading errors
+function handleImageError(element) {
+    element.onerror = null; // Prevent infinite error loop
+    console.error('Failed to load image:', element.src);
+    element.src = 'img/placeholder.png'; // Optional: Set a placeholder image
+}
+
+// Add error handling to all images
+document.addEventListener('DOMContentLoaded', () => {
+    const images = document.querySelectorAll('img');
+    images.forEach(img => {
+        img.onerror = () => handleImageError(img);
+    });
+});
+
+// Prevent accidental page navigation when working on character
+window.addEventListener('beforeunload', (e) => {
+    if (actionHistory.length > 1) {
+        const message = 'You have unsaved changes. Are you sure you want to leave?';
+        e.returnValue = message;
+        return message;
+    }
+});
+
+// Handle keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+    // Undo on Ctrl+Z
+    if (e.ctrlKey && e.key === 'z') {
+        e.preventDefault();
+        undoLastAction();
+    }
+    
+    // Reset on Escape
+    if (e.key === 'Escape') {
+        if (document.getElementById('imageOverlay').style.display !== 'none') {
+            closeImageOverlay();
+        }
+    }
+});
+
+// Handle window resize for responsive behavior
+let resizeTimeout;
+window.addEventListener('resize', () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+        const gifOverlay = document.getElementById('gif-overlay');
+        if (gifOverlay) {
+            gifOverlay.style.width = mainArea.offsetWidth + 'px';
+            gifOverlay.style.height = mainArea.offsetHeight + 'px';
+        }
+    }, 250);
+});
+
+// Prevent dragging of generated images
+document.addEventListener('dragstart', (e) => {
+    if (e.target.classList.contains('placed-asset')) {
+        e.preventDefault();
+    }
+});
+
+// Handle touch events for mobile devices
+function handleTouchStart(e) {
+    if (e.target.classList.contains('clickable-asset')) {
+        e.preventDefault();
+        e.target.click();
+    }
+}
+
+document.addEventListener('touchstart', handleTouchStart, { passive: false });
+
+// Optional: Add analytics tracking
+function trackEvent(eventName, eventData = {}) {
+    try {
+        if (typeof gtag !== 'undefined') {
+            gtag('event', eventName, eventData);
+        }
+    } catch (error) {
+        console.error('Analytics error:', error);
+    }
+}
+
+// Helper function to check if an image is loaded
+function isImageLoaded(img) {
+    return img.complete && img.naturalHeight !== 0;
+}
+
+// Helper function to preload images
+function preloadImage(src) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = src;
+    });
+}
+
+// Preload all 3D versions of assets
+async function preloadAssets() {
+    const assetUrls = [
+        'img/Sponges/green-sponge-3d.png',
+        'img/Sponges/blue-sponge-3d.png',
+        'img/Sponges/red-sponge-3d.png',
+        // Add all your 3D asset URLs here
+    ];
+
+    try {
+        await Promise.all(assetUrls.map(preloadImage));
+        console.log('All assets preloaded successfully');
+    } catch (error) {
+        console.error('Error preloading assets:', error);
+    }
+}
+
+// Call preload on page load
+document.addEventListener('DOMContentLoaded', () => {
+    preloadAssets();
+});
+
+// Handle visibility changes
+document.addEventListener('visibilitychange', () => {
+    const transformSound = document.getElementById('transformSound');
+    if (document.hidden) {
+        transformSound.pause();
+    }
+});
+
+// Clean up function for when component unmounts or page changes
+function cleanup() {
+    const transformSound = document.getElementById('transformSound');
+    if (transformSound) {
+        transformSound.pause();
+        transformSound.currentTime = 0;
+    }
+    
+    // Clear any timeouts
+    clearTimeout(resizeTimeout);
+}
+
+// Optional: Add this to window.onbeforeunload
+window.addEventListener('beforeunload', cleanup);
+</script>
+    </body>
+    </html>
