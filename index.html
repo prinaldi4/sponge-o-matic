@@ -484,6 +484,87 @@
             font-size: 14px;
             border-radius: 8px;
         }
+
+        .secondary-buttons {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .share-buttons {
+            display: flex;
+            gap: 8px;
+            margin-left: 8px;  /* Add some space between Download and share buttons */
+        }
+
+        /* Style for both Download and Share buttons */
+        .download-btn, .share-btn {
+            width: 50px;  /* Make all buttons the same square size */
+            height: 50px; /* Make all buttons the same square size */
+            min-width: unset;  /* Remove any minimum width constraints */
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s, opacity 0.2s;
+            border: none;
+        }
+
+        /* Specific styling for Download button */
+        .download-btn {
+            background-color: #ff4444;
+            width: 50px;
+            height: 50px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+        }
+
+        /* Style for all button icons including download */
+        .download-btn img,
+        .share-btn img {
+            width: 50px;
+            height: 50px;
+        }
+
+
+        /* Add download icon */
+        .download-btn::before {
+            content: none;
+        }
+
+        /* Share button styles */
+        .share-btn {
+            width: 50px;
+            height: 50px;
+        }
+
+        .share-btn img {
+            width: 30px;
+            height: 30px;
+        }
+
+        .share-btn.facebook {
+            background-color: #0866ff;
+        }
+
+        .share-btn.twitter {
+            background-color: #000000;
+        }
+
+        .share-btn.instagram {
+            background: linear-gradient(45deg, #405DE6, #5851DB, #833AB4, #C13584, #E1306C, #FD1D1D);
+        }
+
+        .download-btn:hover,
+        .share-btn:hover {
+            opacity: 0.9;
+            transform: scale(1.05);
+        }
     </style>
 </head>
 
@@ -563,8 +644,23 @@
                 <button onclick="resetMain()">Reset</button>
                 <button class="generate-btn" onclick="generateImage()">Generate</button>
             </div>
-            <button id="downloadBtn" class="download-btn" style="display: none;" onclick="downloadImage()">Download</button>
-        </div>
+            <div class="secondary-buttons" style="display: none;" id="actionButtons">
+                <button id="downloadBtn" class="download-btn" onclick="downloadImage()" aria-label="Download">
+                    <img src="img/Socials/download-button.png" alt="Download">
+                </button>
+                <div class="share-buttons">
+                    <button onclick="shareToFacebook()" class="share-btn facebook" aria-label="Share to Facebook">
+                        <img src="img/Socials/fb-logo.png" alt="Facebook">
+                    </button>
+                    <button onclick="shareToTwitter()" class="share-btn twitter" aria-label="Share to X">
+                        <img src="img/Socials/x-logo-white.png" alt="X">
+                    </button>
+                    <button onclick="shareToInstagram()" class="share-btn instagram" aria-label="Share to Instagram">
+                        <img src="img/Socials/ig-logo-white.png" alt="Instagram">
+                    </button>
+                </div>
+         </div>
+         </div>
 
         <div class="right-toolbar">
             <div class="side-container">
@@ -918,12 +1014,12 @@ function generateImage() {
 
     // Clean up at the end
     setTimeout(() => {
-        if (gifOverlay) {
-            gifOverlay.style.display = 'none';
-        }
-        document.getElementById('downloadBtn').style.display = 'inline-block';
-        isGenerating = false;
-    }, gifDuration);
+    if (gifOverlay) {
+        gifOverlay.style.display = 'none';
+    }
+    document.getElementById('actionButtons').style.display = 'flex';
+    isGenerating = false;
+}, gifDuration);
 }
 
 function downloadImage() {
@@ -979,7 +1075,7 @@ function downloadImage() {
 
     processAssets();
 }
-        
+
 // Helper function to create a clean canvas for screenshots
 function createScreenshot() {
     const screenshotCanvas = document.createElement('canvas');
@@ -1004,6 +1100,33 @@ function createScreenshot() {
     return screenshotCanvas;
 }
 
+function showShareButtons() {
+    document.getElementById('actionButtons').style.display = 'flex';
+}
+
+function shareToFacebook() {
+    // Convert canvas to data URL
+    const imageData = canvas.toDataURL('image/png');
+    
+    // Facebook sharing URL
+    const shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`;
+    
+    // Open sharing window
+    window.open(shareUrl, 'Share to Facebook', 'width=600,height=400');
+}
+
+function shareToTwitter() {
+    // Twitter sharing URL
+    const shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent('Check out my Scotch-Brite character!')}`;
+    
+    // Open sharing window
+    window.open(shareUrl, 'Share to Twitter', 'width=600,height=400');
+}
+
+function shareToInstagram() {
+    alert('To share on Instagram:\n1. Download the image\n2. Open Instagram\n3. Create a new post with the downloaded image');
+}
+
 function saveState() {
     const currentState = {
         background: currentBackground,
@@ -1012,6 +1135,7 @@ function saveState() {
     };
     actionHistory.push(currentState);
 }
+
 
 function undoLastAction() {
     if (actionHistory.length > 1) { // Keep at least one state
