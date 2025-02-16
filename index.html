@@ -1155,7 +1155,7 @@ function undoLastAction() {
         }
 
         // Hide download button if visible
-        const downloadBtn = document.getElementById('downloadBtn');
+        const downloadBtn = document.getElementById('actionButtons');
         if (downloadBtn.style.display !== 'none') {
             downloadBtn.style.display = 'none';
         }
@@ -1181,7 +1181,7 @@ function resetMain() {
     // Reset all states
     currentBackground = '';
     customImageData = null; // Clear custom image data
-    document.getElementById('downloadBtn').style.display = 'none';
+    document.getElementById('actionButtons').style.display = 'none';
     actionHistory = [];
     saveState();
 
