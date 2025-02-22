@@ -7,7 +7,7 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
     
     <style>
         body {
@@ -16,29 +16,31 @@
             align-items: center;
             padding: 20px;
             padding-top: 30px;
-            font-family: "Montserrat", sans-serif;
+            font-family: "Poppins", sans-serif;
             font-optical-sizing: auto;
             font-weight: 400;
             font-style: normal;
+            color: #00534C;
+            background-color: #F1F7F4;
         }
 
         /* NEW: Upload button styles */
         .upload-container {
             width: 120px;  /* Match the width of other containers */
             height: 120px; /* Match the height of other containers */
-            background-color: #58B74E;
+            background-color: #00B74F;
             border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
+            color: #F1F7F4;
             font-weight: bold;
         }
 
         .upload-btn {
             width: 120px;
             height: 120px;
-            background-color: #58B74E;
+            background-color: #00B74F;
             color: white;
             border-radius: 8px;
             cursor: pointer;
@@ -54,7 +56,7 @@
         }
 
         .upload-btn:hover {
-            background-color: #48973f;
+            background-color: #008037;
         }
 
         /* NEW: Image overlay styles */
@@ -177,7 +179,7 @@
 
         .overlay-controls select:focus {
             outline: none;
-            border-color: #58B74E;
+            border-color: #00B74F;
             box-shadow: 0 0 0 3px rgba(88, 183, 78, 0.1);
         }
 
@@ -228,11 +230,12 @@
             margin-top: 10px;
             font-weight: 700;  /* Bold weight */
             font-size: 50pt;
+            letter-spacing: 0.1em;
         }
 
         .sub-copy {
             font-size: 18px;
-            color: #666666;
+            color: #00534C;
             margin-bottom: 30px;
             text-align: center;
             max-width: 600px;
@@ -259,7 +262,7 @@
             min-height: 500px;
             max-width: 450px;
             max-height: 600px;
-            border: 1px solid #000;
+            border: 1.5px solid #00534C;
             margin: 10px 0 0 0; /* Add margin-top of 10px, adjust this value as needed */
             align-self: start; /* This ensures the main area aligns to the top */
         }
@@ -287,7 +290,7 @@
         .side-container {
             width: 250px;
             height: auto;
-            border: 1px solid #ccc;
+            border: 2px solid #BCE194;
             margin: 10px;
             display: flex;
             flex-direction: row;
@@ -308,7 +311,7 @@
 
         .color-options {
             width: 550px;  /* Increase width to accommodate all items */
-            border: 1px solid #ccc;
+            border: 2px solid #BCE194;
             margin: 10px auto 30px auto;
             padding: 20px;  /* Add more padding */
             border-radius: 8px;
@@ -358,8 +361,8 @@
             font-weight: 600;  /* Regular weight */
             width: 100%;
             height: 100%;
-            background-color: #FFB800;
-            color: black;
+            background-color: #BCE194;
+            color: #00534C;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -396,7 +399,7 @@
         .clickable-asset:hover {
             transform: scale(1.1);
             transition: transform 0.2s;
-            border-color: #FFB800;
+            border-color: #00B74F;
         }
 
         .placed-asset {
@@ -426,32 +429,33 @@
             padding: 15px 30px;
             font-size: 18px;
             font-weight: 700;  /* Bold weight */
-            background-color: #FFB800;
-            color: rgb(0, 0, 0);
+            background-color: #00B74F;
+            color: rgb(255, 255, 255);
             border: none;
             border-radius: 5px;
             cursor: pointer;
             min-width: 120px; /* Make all buttons the same width */
+            letter-spacing: 0.1em;
         }
 
         button:hover {
-            background-color: #E6A600;
+            background-color: #008037;
         }
 
         .generate-btn {
-            background-color: #58B74E;  /* Green color for Generate */
+            background-color: #00534C;  /* Green color for Generate */
         }
 
         .generate-btn:hover {
-            background-color: #48973f;  /* Darker green for Generate hover */
+            background-color: #003934;  /* Darker green for Generate hover */
         }
 
         .download-btn {
-            background-color: #ff4444;  /* Yellow color for Download */
+            background-color: #00B74F;  /* Yellow color for Download */
         }
 
         .download-btn:hover {
-            background-color: #cc0000;  /* Darker yellow for hover */
+            background-color: #008037;  /* Darker yellow for hover */
         }
 
         .gif-overlay {
@@ -514,7 +518,7 @@
 
         /* Specific styling for Download button */
         .download-btn {
-            background-color: #ff4444;
+            background-color: #00B74F;
             width: 50px;
             height: 50px;
             padding: 0;
@@ -569,9 +573,9 @@
 </head>
 
 <body>
-    <img src="img/Logos.jpg" alt="Logo" class="logo">
-    <h1>Sponge-O-Matic</h1>
-    <p class="sub-copy">Customize your <b>Scotch-Brite™ Scrub Sponge</b> to create <br>your own Bikini Bottom character!</p>
+    <img src="img/Logos.png" alt="Logo" class="logo">
+    <h1>SPONGE-O-MATIC</h1>
+    <p class="sub-copy">Customize your <b>Scotch-Brite® Scrub Sponge</b> to create <br>your own Bikini Bottom character!</p>
 
     <div class="color-options">
         <h3>Choose Your Sponge</h3>
@@ -640,9 +644,9 @@
 
         <div class="button-container">
             <div class="primary-buttons">
-                <button onclick="undoLastAction()">Undo</button>
-                <button onclick="resetMain()">Reset</button>
-                <button class="generate-btn" onclick="generateImage()">Generate</button>
+                <button onclick="undoLastAction()">UNDO</button>
+                <button onclick="resetMain()">RESET</button>
+                <button class="generate-btn" onclick="generateImage()">SPONGIFY!</button>
             </div>
             <div class="secondary-buttons" style="display: none;" id="actionButtons">
                 <button id="downloadBtn" class="download-btn" onclick="downloadImage()" aria-label="Download">
@@ -722,7 +726,7 @@
                 </select>
                 
                 <button onclick="addCustomImage()" class="generate-btn">
-                    Spongify!
+                    SPONGIFY!
                 </button>
             </div>
         </div>
